@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101010">
+<meta name="description" content="Twój prywatny kalendarz adwentowy 007. 24 filmy, jedno losowanie dziennie.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>007 Advent Wheel</title>
+<style>
+:root{color-scheme:dark;--bg:#0c0d0f;--panel:#17191c;--gold:#c8a75e;--gold2:#f0d99c;--muted:#a8a39a;--line:#55472b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#34302a 0,#151515 38%,var(--bg) 75%);color:#f5f1e8;font-family:Georgia,'Times New Roman',serif;min-height:100vh}
+main{max-width:720px;margin:auto;padding:24px 18px 44px}.top{text-align:center;padding:18px 0 8px}.eyebrow{font:11px/1.5 Arial,sans-serif;letter-spacing:.34em;color:var(--gold);text-transform:uppercase}.brand{font-size:clamp(36px,10vw,62px);letter-spacing:.06em;margin:8px 0 2px;font-weight:500}.brand span{color:var(--gold)}.subtitle{font:11px Arial,sans-serif;letter-spacing:.22em;color:var(--muted);text-transform:uppercase}
+.rule{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:20px auto;max-width:440px}
+.stats{display:flex;justify-content:center;gap:26px;margin:18px 0 22px}.stat{text-align:center}.stat strong{display:block;font-size:25px;color:var(--gold2);font-weight:400}.stat small{font:10px Arial,sans-serif;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+.wheel-wrap{position:relative;width:min(86vw,430px);margin:0 auto 18px;filter:drop-shadow(0 12px 24px #000b)}
+.pointer{position:absolute;z-index:3;left:50%;top:-4px;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:28px solid var(--gold2);filter:drop-shadow(0 2px 2px #000)}
+#wheel{display:block;width:100%;height:auto;transition:transform 5s cubic-bezier(.12,.78,.12,1);border-radius:50%}
+.hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:27%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#29251c,#090a0b 70%);border:2px solid var(--gold);display:grid;place-items:center;text-align:center;box-shadow:0 0 0 5px #111,0 0 18px #000}
+.hub b{font-size:clamp(20px,6vw,29px);color:var(--gold2);letter-spacing:.04em}.hub small{display:block;font:8px Arial,sans-serif;letter-spacing:.2em;color:#ddd}
+button{font:12px Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--gold);background:linear-gradient(135deg,#d6bb7b,#9c7836);color:#111;padding:16px 24px;min-height:52px;border-radius:2px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}.primary{display:block;width:min(100%,360px);margin:18px auto}.secondary{background:transparent;color:var(--gold2);padding:11px 15px;min-height:42px;font-size:10px}
+.result{display:none;text-align:center;background:linear-gradient(145deg,#201d17,#141517);border:1px solid var(--line);padding:22px 18px;margin:22px auto;max-width:520px}.result.show{display:block}.result .label{font:10px Arial,sans-serif;letter-spacing:.24em;color:var(--gold);text-transform:uppercase}.result h2{font-size:clamp(23px,6vw,34px);font-weight:400;margin:12px 0;color:var(--gold2)}.result p{font:12px Arial,sans-serif;color:var(--muted)}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.section{margin:34px 0 0}.section h3{font:11px Arial,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:normal;border-bottom:1px solid #3b3325;padding-bottom:11px}
+.list{display:grid;gap:8px}.entry{display:flex;align-items:center;gap:12px;padding:10px 12px;background:#151719;border:1px solid #292a29;font:14px Arial,sans-serif}.num{color:var(--gold);font:12px Georgia;width:22px}.entry .film{flex:1}.entry.done{opacity:.52}.entry.done .film{text-decoration:line-through}.entry button{padding:8px 10px;min-height:34px;font-size:9px;letter-spacing:.08em}
+.note{font:11px/1.6 Arial,sans-serif;color:var(--muted);text-align:center;margin:24px auto 0;max-width:470px}.install{display:none;margin:0 auto 18px;text-align:center}.install.show{display:block}
+footer{text-align:center;margin-top:36px;color:#777;font:9px Arial,sans-serif;letter-spacing:.16em}
+@media(min-width:600px){main{padding-top:34px}.stats{gap:54px}}
+</style>
+</head>
+<body>
+<main>
+<header class="top">
+  <div class="eyebrow">A private Christmas assignment</div>
+  <h1 class="brand"><span>007</span> ADVENT WHEEL</h1>
+  <div class="subtitle">Twenty-four films. One mission.</div>
+  <div class="rule"></div>
+</header>
+<div class="install" id="installBox"><button class="secondary" id="installBtn">Install on this device</button></div>
+<div class="stats">
+  <div class="stat"><strong id="remaining">24</strong><small>pozostało</small></div>
+  <div class="stat"><strong id="completed">0</strong><small>obejrzano</small></div>
+  <div class="stat"><strong id="day">1 / 24</strong><small>losowanie</small></div>
+</div>
+<div class="wheel-wrap">
+  <div class="pointer"></div>
+  <canvas id="wheel" width="900" height="900" aria-label="Koło fortuny z filmami o Jamesie Bondzie"></canvas>
+  <div class="hub"><div><b>007</b><small>MI6</small></div></div>
+</div>
+<button class="primary" id="spin">Losuj film</button>
+<section class="result" id="result" aria-live="polite">
+  <div class="label">Today's assignment</div>
+  <h2 id="resultTitle"></h2>
+  <p id="resultDate"></p>
+  <div class="actions"><button class="secondary" id="markDone">Oznacz jako obejrzany</button></div>
+</section>
+<section class="section">
+  <h3>Rejestr misji</h3>
+  <div class="list" id="history"></div>
+</section>
+<p class="note">Losowanie odbywa się bez powtórzeń. Postępy zapisują się na tym urządzeniu. Edycja 2026: 30 listopada – 23 grudnia. „Nie czas umierać” pozostaje poza pulą.</p>
+<footer>FOR YOUR EYES ONLY · 007 ADVENT WHEEL</footer>
+</main>
+<script>
+const films = [
+"Doktor No (1962)","Pozdrowienia z Rosji (1963)","Goldfinger (1964)","Operacja Piorun (1965)",
+"Żyje się tylko dwa razy (1967)","W tajnej służbie Jej Królewskiej Mości (1969)","Diamenty są wieczne (1971)",
+"Żyj i pozwól umrzeć (1973)","Człowiek ze złotym pistoletem (1974)","Szpieg, który mnie kochał (1977)",
+"Moonraker (1979)","Tylko dla twoich oczu (1981)","Ośmiorniczka (1983)","Zabójczy widok (1985)",
+"W obliczu śmierci (1987)","Licencja na zabijanie (1989)","GoldenEye (1995)","Jutro nie umiera nigdy (1997)",
+"Świat to za mało (1999)","Śmierć nadejdzie jutro (2002)","Casino Royale (2006)",
+"Quantum of Solace (2008)","Skyfall (2012)","Spectre (2015)"
+];
+const key="007-advent-wheel-2026-v1";
+let state=load();
+let pending=null, spinning=false, rotation=0;
+const canvas=document.getElementById("wheel"),ctx=canvas.getContext("2d");
+const $=id=>document.getElementById(id);
+function load(){try{const x=JSON.parse(localStorage.getItem(key));if(x&&Array.isArray(x.remaining)&&Array.isArray(x.picked))return x}catch(e){}return {remaining:[...films],picked:[],done:[]}}
+function save(){localStorage.setItem(key,JSON.stringify(state))}
+function draw(){
+ const n=state.remaining.length, cx=450,cy=450,r=425;ctx.clearRect(0,0,900,900);
+ if(!n){ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle="#25221b";ctx.fill();ctx.strokeStyle="#c8a75e";ctx.lineWidth=9;ctx.stroke();ctx.fillStyle="#f0d99c";ctx.textAlign="center";ctx.font="34px Georgia";ctx.fillText("MISSION COMPLETE",450,460);return}
+ for(let i=0;i<n;i++){
+  const a=-Math.PI/2+i*2*Math.PI/n,b=a+2*Math.PI/n;
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,b);ctx.closePath();
+  ctx.fillStyle=i%2?"#252b32":"#41403b";ctx.fill();ctx.strokeStyle="#c8a75e";ctx.lineWidth=3;ctx.stroke();
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(a+Math.PI/n);
+  ctx.textAlign="right";ctx.fillStyle=i%2?"#f0d99c":"#fff2d0";
+  const max=24, label=state.remaining[i].replace(/ \(\d{4}\)/,"");
+  ctx.font="bold 19px Arial";let txt=label;if(txt.length>max)txt=txt.slice(0,max-1)+"…";
+  ctx.fillText(txt, r-28, 7);ctx.restore();
+ }
+ ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle="#d5b66e";ctx.lineWidth=12;ctx.stroke();
+}
+function render(){
+ $("remaining").textContent=state.remaining.length;$("completed").textContent=state.done.length;
+ $("day").textContent=`${state.picked.length+1} / 24`;
+ $("spin").disabled=spinning||!state.remaining.length;
+ $("spin").textContent=state.remaining.length?"Losuj film":"Misja zakończona";
+ const hist=$("history");hist.innerHTML="";
+ state.picked.forEach((film,i)=>{
+  const row=document.createElement("div");row.className="entry"+(state.done.includes(film)?" done":"");
+  const num=document.createElement("span");num.className="num";num.textContent=String(i+1).padStart(2,"0");
+  const name=document.createElement("span");name.className="film";name.textContent=film;
+  const btn=document.createElement("button");btn.className="secondary";btn.textContent=state.done.includes(film)?"Obejrzano":"Oznacz";
+  btn.addEventListener("click",()=>{state.done=state.done.includes(film)?state.done.filter(x=>x!==film):[...state.done,film];save();render()});
+  row.append(num,name,btn);hist.append(row);
+ });
+ draw();
+}
+function spin(){
+ if(spinning||!state.remaining.length)return;
+ spinning=true;$("result").classList.remove("show");render();
+ const index=Math.floor(Math.random()*state.remaining.length),film=state.remaining[index],n=state.remaining.length;
+ const slice=360/n, target=360-(index*slice+slice/2);
+ const current=((rotation%360)+360)%360, extra=5*360+((target-current+360)%360);
+ rotation+=extra;
+ canvas.style.transform=`rotate(${rotation}deg)`;
+ setTimeout(()=>{
+  state.remaining.splice(index,1);state.picked.push(film);pending=film;save();
+  $("resultTitle").textContent=film;
+  const date=new Date(2026,10,30+state.picked.length-1);
+  $("resultDate").textContent=`Przydział ${state.picked.length}/24 · ${date.toLocaleDateString("pl-PL",{day:"numeric",month:"long"})}`;
+  $("result").classList.add("show");spinning=false;render();
+ },5100);
+}
+$("spin").addEventListener("click",spin);
+$("markDone").addEventListener("click",()=>{if(!pending)return;if(!state.done.includes(pending))state.done.push(pending);save();render();$("markDone").textContent="Obejrzano ✓";$("markDone").disabled=true});
+render();
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBox").classList.add("show")});
+$("installBtn").addEventListener("click",async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$("installBox").classList.remove("show")});
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+</script>
+</body></html>
